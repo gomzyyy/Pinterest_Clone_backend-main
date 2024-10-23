@@ -4,8 +4,9 @@ import { User } from "../models/userModel/user.model.js";
 
 export const authorise = async (req, res, next) => {
   try {
-    console.log("requested")
+    // console.log("requested");
     const token = req.headers.authorization?.split(" ")[1];
+    // console.log(token);
     if (!token) {
       return res.status(e.UNAUTHORIZED.code).json({
         message: "Unauthorised action!",
@@ -27,13 +28,14 @@ export const authorise = async (req, res, next) => {
           success: false,
         });
       }
-      const user = await User.findById(UID);
+      const user = await User.findById(UID).select("-password -otp");
       if (!user) {
         return res.status(e.NOT_FOUND.code).json({
           message: "User not found with the given token!",
           success: false,
         });
       }
+      // console.log(user);
       req.user = user;
       next();
     });

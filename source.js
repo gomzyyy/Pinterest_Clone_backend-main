@@ -7,9 +7,11 @@ import {
   deletePostController,
 } from "./controllers/Post/post.controller.js";
 import { postActionsController } from "./controllers/Post/postUpdationController.js";
-import { serveStaticData } from "./controllers/getData/serveStaticData.js";
+import { serveStaticData } from "./controllers/getData/serveStaticData.controller.js";
 import { authorise } from "./middlewares/authentication.js";
-import { servePosts } from "./controllers/getData/servePosts.js";
+import { servePosts } from "./controllers/getData/servePosts.controller.js";
+import { getAdminController } from "./controllers/getData/getAdmin.controller.js";
+import { autoLoginController } from "./controllers/user/autoLogin.controller.js";
 
 export {
   signupController,
@@ -19,6 +21,8 @@ export {
   postUploadController,
   deletePostController,
   postActionsController,
+  getAdminController,
+  autoLoginController,
   serveStaticData,
   servePosts,
   authorise
