@@ -13,6 +13,7 @@ export const loginController = async (req, res) => {
       }
       const user = await User.findOne({ userId });
       if (!user) {
+        console.log(res)
         return res.status(e.BAD_REQUEST.code).json({
           message: "No user found with this userId.",
           success: false,

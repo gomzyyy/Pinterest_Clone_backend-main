@@ -18,15 +18,15 @@ const UserModel = new Schema(
   {
     userName: {
       type: String,
-      required: [true, "Username is required."]
+      required: [true, "Username is required."],
     },
     userId: {
       type: String,
       required: [true, "user ID is required."],
-      unique: true
+      unique: true,
     },
     email: {
-      type: String||null,
+      type: String || null,
       validate: {
         validator: (v) => emailRegex.test(v),
         message: (props) => `${props.value} is not a valid email!`,
@@ -62,6 +62,9 @@ const UserModel = new Schema(
         ref: "User",
       },
     ],
+    bio: {
+      type: String,
+    },
     bookmarks: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -74,13 +77,13 @@ const UserModel = new Schema(
         ref: "ReportUser",
       },
     ],
-    isDisabled:{
-      type:Boolean,
-      default:false
+    isDisabled: {
+      type: Boolean,
+      default: false,
     },
-    isPrivate:{
-      type:Boolean,
-      default:false
+    isPrivate: {
+      type: Boolean,
+      default: false,
     },
     premiumUser: {
       type: Boolean,
@@ -92,6 +95,7 @@ const UserModel = new Schema(
     },
     dateOfBirth: {
       type: Date,
+      default:''
     },
     age: {
       type: Number,

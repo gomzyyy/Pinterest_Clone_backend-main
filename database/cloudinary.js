@@ -10,8 +10,9 @@ const mediaDB = async (imagePath) => {
     });
     console.log("uploading")
     const cloudinaryResponse = await cloudinary.uploader.upload(imagePath);
-    console.log(cloudinaryResponse);
-    return cloudinaryResponse.url;
+    if(cloudinaryResponse.url!==null){
+      return cloudinaryResponse.url;
+    }
   } catch (error) {
     console.log(error);
   }

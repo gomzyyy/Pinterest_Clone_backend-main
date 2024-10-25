@@ -4,18 +4,17 @@ import { User } from "../models/userModel/user.model.js";
 
 export const authorise = async (req, res, next) => {
   try {
-    // console.log("requested");
     const token = req.headers.authorization?.split(" ")[1];
-    // console.log(token);
     if (!token) {
       return res.status(e.UNAUTHORIZED.code).json({
         message: "Unauthorised action!",
         success: false,
       });
+
     }
     jwt.verify(token, process.env.SECRET_KEY, async (error, decode) => {
       if (error) {
-        return res.status(e.BAD_GATEWAY.code).json({
+       return res.status(e.BAD_GATEWAY.code).json({
           message: "Invalid token",
           success: false,
         });
@@ -28,14 +27,13 @@ export const authorise = async (req, res, next) => {
           success: false,
         });
       }
-      const user = await User.findById(UID).select("-password -otp");
+      const user = await User.findById(UID).select("-password -otp -posts -bookmarks");
       if (!user) {
         return res.status(e.NOT_FOUND.code).json({
           message: "User not found with the given token!",
-          success: false,
+          success: true,
         });
       }
-      // console.log(user);
       req.user = user;
       next();
     });
@@ -45,6 +43,6 @@ export const authorise = async (req, res, next) => {
       message: e.INTERNAL_SERVER_ERROR.message,
       success: false,
       error: error.message ? error.message : null,
-    });
+    })
   }
 };
