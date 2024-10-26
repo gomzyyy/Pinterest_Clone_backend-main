@@ -27,11 +27,11 @@ export const authorise = async (req, res, next) => {
           success: false,
         });
       }
-      const user = await User.findById(UID).select("-password -otp -posts -bookmarks");
+      const user = await User.findById(UID).select("-otp");
       if (!user) {
         return res.status(e.NOT_FOUND.code).json({
           message: "User not found with the given token!",
-          success: true,
+          success: false,
         });
       }
       req.user = user;
@@ -42,7 +42,6 @@ export const authorise = async (req, res, next) => {
     return res.status(e.INTERNAL_SERVER_ERROR.code).json({
       message: e.INTERNAL_SERVER_ERROR.message,
       success: false,
-      error: error.message ? error.message : null,
     })
   }
 };

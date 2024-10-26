@@ -4,7 +4,6 @@ import { Post } from "../../models/userModel/postModel/post.model.js";
 import jwt from "jsonwebtoken";
 import mediaDB from "../../database/cloudinary.js";
 
-
 export const postUploadController = async (req, res) => {
   try {
     const { title, tags } = req.body;
@@ -16,8 +15,16 @@ export const postUploadController = async (req, res) => {
         success: false,
       });
     }
-
-    console.log(imagePath)
+    if (!user) {
+      return res.status(e.NOT_FOUND.code).json({
+        message: "Can't find the user credientials.",
+        success: false,
+      });
+    }
+    // if (!user.posts) {
+    //   user.posts = [];
+    // }
+    console.log(imagePath);
 
     if (!title || !imagePath || !tags) {
       return res.status(e.BAD_REQUEST.code).json({
@@ -25,56 +32,53 @@ export const postUploadController = async (req, res) => {
         success: false,
       });
     }
-    if (imagePath.trim()==="") {
+    if (imagePath.trim() === "") {
       return res.status(e.BAD_REQUEST.code).json({
         message: "Image is required!",
         success: false,
       });
     }
-      if (!user) {
-        return res.status(e.NOT_FOUND.code).json({
-          message: "Can't find the user credientials.",
-          success: false,
-        });
+    let imageUrl;
+    try {
+      const uploadPostImageToCloudinary = await mediaDB(imagePath);
+      if (uploadPostImageToCloudinary) {
+        imageUrl = uploadPostImageToCloudinary;
       }
-      let imageUrl;
-      try {
-        const uploadPostImageToCloudinary = await mediaDB(imagePath);
-        if (uploadPostImageToCloudinary) {
-          imageUrl = uploadPostImageToCloudinary;
-        }
-      } catch (uploadError) {
-        console.log(uploadError)
-        return res.status(e.INTERNAL_SERVER_ERROR.code).json({
-          message: "An error occured while creating the post.",
-          success: false,
-          error: uploadError.message,
-        });
-      }
-      if (imageUrl.trim()==="") {
-        return res.status(e.BAD_REQUEST.code).json({
-          message: "Invalid image URL provided by the database!",
-          success: false,
-        });
-      }
-      const tagsArray = tags.split(",").map((tag) => tag.trim()).filter(Boolean);
-      const newPost = new Post({
-        title: title.trim(),
-        admin: user._id,
-        image: imageUrl,
-        tags: tagsArray,
+    } catch (uploadError) {
+      console.log(uploadError);
+      return res.status(e.INTERNAL_SERVER_ERROR.code).json({
+        message: "An error occured while creating the post.",
+        success: false,
+        error: uploadError.message,
       });
-      await newPost.save();
-
-      user.posts.unshift(newPost._id);
-
-      await user.save();
-      return res.status(e.OK.code).json({
-        message: "Post created success!",
-        success: true,
+    }
+    if (imageUrl.trim() === "") {
+      return res.status(e.BAD_REQUEST.code).json({
+        message: "Invalid image URL provided by the database!",
+        success: false,
       });
+    }
+    const tagsArray = tags
+      .split(",")
+      .map((tag) => tag.trim())
+      .filter(Boolean);
+    const newPost = new Post({
+      title: title.trim(),
+      admin: user._id,
+      image: imageUrl,
+      tags: tagsArray,
+    });
+    await newPost.save();
+
+   await user.posts.push(newPost._id);
+
+    await user.save();
+    return res.status(e.OK.code).json({
+      message: "Post created success!",
+      success: true,
+    });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     return res.status(e.INTERNAL_SERVER_ERROR.code).json({
       message: "An error occurred while creating post.",
       success: false,

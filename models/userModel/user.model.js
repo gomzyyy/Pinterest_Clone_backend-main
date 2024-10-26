@@ -26,7 +26,8 @@ const UserModel = new Schema(
       unique: true,
     },
     email: {
-      type: String || null,
+      type: String,
+      required: false,
       validate: {
         validator: (v) => emailRegex.test(v),
         message: (props) => `${props.value} is not a valid email!`,
@@ -95,7 +96,7 @@ const UserModel = new Schema(
     },
     dateOfBirth: {
       type: Date,
-      default:''
+      default: null,
     },
     age: {
       type: Number,
@@ -132,7 +133,7 @@ const UserModel = new Schema(
       get: function () {
         if (!this.lastLoggedIn) return null;
         const now = new Date();
-        const timeDifferenceMs = now - new Date(this.lastLoggedIn);
+        const timeDifferenceMs = now - this.lastLoggedIn;
         const differenceInMins = Math.floor(timeDifferenceMs / 1000 / 60);
         return differenceInMins;
       },
