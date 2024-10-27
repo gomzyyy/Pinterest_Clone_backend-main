@@ -27,7 +27,7 @@ export const authorise = async (req, res, next) => {
           success: false,
         });
       }
-      const user = await User.findById(UID).select("-otp");
+      const user = await User.findById(UID).select("-otp").populate('posts');
       if (!user) {
         return res.status(e.NOT_FOUND.code).json({
           message: "User not found with the given token!",

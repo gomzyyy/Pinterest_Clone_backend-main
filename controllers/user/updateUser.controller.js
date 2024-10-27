@@ -1,12 +1,10 @@
 import { HTTP_STATUS_CODES as e } from "../../staticData/errorMessages.js";
 import { User } from "../../models/userModel/user.model.js";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
 import mediaDB from "../../database/cloudinary.js";
 
 export const updateUserController = async (req, res) => {
   try {
-    console.log("requested");
     const user = req.user;
     if (!user) {
       return res.status(e.NOT_FOUND.code).json({
@@ -19,7 +17,6 @@ export const updateUserController = async (req, res) => {
       req.body;
 
     const avatar = req.file ? req.file.path : null;
-
     if (
       !userName &&
       !password &&
@@ -75,6 +72,7 @@ export const updateUserController = async (req, res) => {
    const  updatedData ={
       userName: user.userName ? user.userName : null,
       password: user.password ? user.password : null,
+      avatar: user.avatar ? user.avatar : null,
       isPrivate:user.isPrivate,
       gender: user.gender ? user.gender : null,
       dateOfBirth: user.dateOfBirth ? user.dateOfBirth : null,

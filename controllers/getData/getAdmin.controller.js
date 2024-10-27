@@ -3,7 +3,7 @@ import { Post } from "../../models/userModel/postModel/post.model.js";
 
 export const getAdminController = async (req, res) => {
   try {
-    console.log("REquested");
+    console.log("Requested");
     const user = req.user;
     // console.log(user)
     if (!user) {
@@ -13,7 +13,21 @@ export const getAdminController = async (req, res) => {
       });
     }
 
-    // const adminPosts = await Promise.all(
+   // POSTS ALGO
+    return res.status(e.OK.code).json({
+      message: e.OK.message,
+      success: true,
+      admin: user
+    });
+  } catch (error) {
+    return res.status(e.INTERNAL_SERVER_ERROR.code).json({
+      message: e.INTERNAL_SERVER_ERROR.message,
+      success: false,
+    });
+  }
+};
+// POST ALGO
+ // const adminPosts = await Promise.all(
     //   user.posts.map(async (p) => {
     //     if (p) {
     //       const getAdminPosts = await Post.findById(p);
@@ -43,15 +57,3 @@ export const getAdminController = async (req, res) => {
 
     //   })
     // );
-    return res.status(e.OK.code).json({
-      message: e.OK.message,
-      success: true,
-      admin: user
-    });
-  } catch (error) {
-    return res.status(e.INTERNAL_SERVER_ERROR.code).json({
-      message: e.INTERNAL_SERVER_ERROR.message,
-      success: false,
-    });
-  }
-};

@@ -43,8 +43,20 @@ const UserModel = new Schema(
     },
     avatar: {
       type: String,
-      default: "",
+      default: "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg",
     },
+    archivedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
+    deletedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
     posts: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -65,6 +77,7 @@ const UserModel = new Schema(
     ],
     bio: {
       type: String,
+      default: "",
     },
     bookmarks: [
       {

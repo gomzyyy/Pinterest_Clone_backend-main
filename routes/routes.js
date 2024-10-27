@@ -35,7 +35,7 @@ route.post(
   postUploadController
 );
 route.post("/user/posts/delete/:postId", authorise, deletePostController);
-route.post("/user/posts/post/update/:postId", authorise, postActionsController);
+route.post("/user/posts/post/actions/:postId", authorise, postActionsController);
 
 // serving data
 

@@ -9,8 +9,6 @@ export const postUpdationController =async(req, res)=>{
   
 }
 
-
-
 export const postActionsController = async (req, res) => {
   try {
     const { likes, getcomment, reportPost, dislikes } = req.body;

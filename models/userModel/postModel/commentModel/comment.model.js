@@ -52,6 +52,10 @@ const ReplyModel = new Schema({
     type: Boolean,
     default: true,
   },
+  hidden:{
+    type:Boolean,
+    default:false
+  }
 });
 
 const Reply = mongoose.model("Reply", ReplyModel);
