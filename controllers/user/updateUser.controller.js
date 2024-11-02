@@ -1,10 +1,10 @@
 import { HTTP_STATUS_CODES as e } from "../../staticData/errorMessages.js";
-import { User } from "../../models/userModel/user.model.js";
 import bcrypt from "bcryptjs";
 import mediaDB from "../../database/cloudinary.js";
 
 export const updateUserController = async (req, res) => {
   try {
+    console.log("requested");
     const user = req.user;
     if (!user) {
       return res.status(e.NOT_FOUND.code).json({
@@ -13,15 +13,38 @@ export const updateUserController = async (req, res) => {
       });
     }
 
-    const { userName, password, isPrivate, gender, dateOfBirth, bio } =
-      req.body;
-
+    const {
+      userName,
+      password,
+      isPrivate,
+      isDisabled,
+      gender,
+      dateOfBirth,
+      bio,
+    } = req.body;
+    console.log(
+      userName,
+      password,
+      isPrivate,
+      isDisabled,
+      gender,
+      dateOfBirth,
+      bio
+    );
+    console.log(userName,
+      password,
+      isPrivate,
+      isDisabled,
+      gender,
+      dateOfBirth,
+      bio,)
     const avatar = req.file ? req.file.path : null;
     if (
       !userName &&
       !password &&
       !avatar &&
       isPrivate === undefined &&
+      isDisabled === undefined &&
       !gender &&
       !dateOfBirth &&
       !bio
@@ -30,7 +53,7 @@ export const updateUserController = async (req, res) => {
         message: "No updated data provided!",
       });
     }
-    console.log(isPrivate)
+    console.log(isPrivate);
 
     if (userName && user.userName !== userName) {
       user.userName = userName.trim();
@@ -62,6 +85,9 @@ export const updateUserController = async (req, res) => {
     if (isPrivate !== undefined) {
       user.isPrivate = isPrivate;
     }
+    if (isDisabled !== undefined) {
+      user.isDisabled = isDisabled;
+    }
     if (gender) {
       user.gender = gender;
     }
@@ -69,22 +95,23 @@ export const updateUserController = async (req, res) => {
       user.dateOfBirth = dateOfBirth;
     }
 
-   const  updatedData ={
+    const updatedData = {
       userName: user.userName ? user.userName : null,
       password: user.password ? user.password : null,
       avatar: user.avatar ? user.avatar : null,
-      isPrivate:user.isPrivate,
+      isPrivate: user.isPrivate,
+      isDisabled: user.isDisabled,
       gender: user.gender ? user.gender : null,
       dateOfBirth: user.dateOfBirth ? user.dateOfBirth : null,
       bio: user.bio ? user.bio : null,
-    }
-    console.log(updatedData)
+    };
+    console.log(updatedData);
 
     await user.save();
     return res.status(e.OK.code).json({
       message: "Profile updated successfully!",
       success: true,
-      data:updatedData,
+      data: updatedData,
     });
   } catch (error) {
     console.log(error);
