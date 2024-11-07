@@ -31,13 +31,15 @@ export const updateUserController = async (req, res) => {
       dateOfBirth,
       bio
     );
-    console.log(userName,
+    console.log(
+      userName,
       password,
       isPrivate,
       isDisabled,
       gender,
       dateOfBirth,
-      bio,)
+      bio
+    );
     const avatar = req.file ? req.file.path : null;
     if (
       !userName &&
@@ -92,7 +94,7 @@ export const updateUserController = async (req, res) => {
       user.gender = gender;
     }
     if (dateOfBirth) {
-      user.dateOfBirth = dateOfBirth;
+      user.dateOfBirth = Date(dateOfBirth);
     }
 
     const updatedData = {

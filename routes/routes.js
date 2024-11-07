@@ -8,6 +8,8 @@ import {
   deletePostController,
   postActionsController,
   getAdminController,
+  getPostByIdController,
+  postUpdationController,
   serveStaticData,
   servePosts,
   authorise,
@@ -34,12 +36,13 @@ route.post(
   authorise,
   postUploadController
 );
-route.post("/user/posts/delete/:postId", authorise, deletePostController);
-route.post("/user/posts/post/actions/:postId", authorise, postActionsController);
+route.post("/user/post/delete/:postId", authorise, deletePostController);
+route.post("/user/post/actions/:postId", authorise, postActionsController);
 
 // serving data
 
 route.get("/user/get-posts", authorise, servePosts);
+route.get("/user/post/get-post/:postId", authorise, getPostByIdController);
 route.get('/user/profile/get-user', authorise, getAdminController)
 route.get('/check-user', authorise, autoLoginController)
 route.get("/user/get/:dataType", authorise, serveStaticData);

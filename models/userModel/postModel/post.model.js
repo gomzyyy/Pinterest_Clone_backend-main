@@ -80,6 +80,12 @@ const PostModel = new Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
     },
+    visits: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     tags: [
       {
         type: String,

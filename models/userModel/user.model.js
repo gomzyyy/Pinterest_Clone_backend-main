@@ -108,7 +108,7 @@ const UserModel = new Schema(
       enum: ["male", "female", "others"],
     },
     dateOfBirth: {
-      type: Date,
+      type: String,
       default: null,
     },
     age: {
