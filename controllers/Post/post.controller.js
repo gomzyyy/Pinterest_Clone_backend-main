@@ -24,7 +24,7 @@ export const postUploadController = async (req, res) => {
     // if (!user.posts) {
     //   user.posts = [];
     // }
-    console.log(imagePath);
+    // console.log(imagePath);
 
     if (!title || !imagePath || !tags) {
       return res.status(e.BAD_REQUEST.code).json({
@@ -45,7 +45,7 @@ export const postUploadController = async (req, res) => {
         imageUrl = uploadPostImageToCloudinary;
       }
     } catch (uploadError) {
-      console.log(uploadError);
+      // console.log(uploadError);
       return res.status(e.INTERNAL_SERVER_ERROR.code).json({
         message: "An error occured while creating the post.",
         success: false,
@@ -78,7 +78,7 @@ export const postUploadController = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return res.status(e.INTERNAL_SERVER_ERROR.code).json({
       message: "An error occurred while creating post.",
       success: false,

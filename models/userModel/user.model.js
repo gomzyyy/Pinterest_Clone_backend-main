@@ -12,8 +12,23 @@ const ReportUserModel = new Schema({
     maxLength: [20, "Category can't exceed 20 characters"],
   },
 });
-const ReportUser = mongoose.model("ReportUser", ReportUserModel);
+export const ReportUser = mongoose.model("ReportUser", ReportUserModel);
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+const historyModel = new Schema({
+  userIds:[{
+    type:String
+  }],
+  userNames:[{
+    type:String
+  }],
+  tags:[{
+ type:String
+  }]
+})
+
+export const History = mongoose.model("History", historyModel)
+
 const UserModel = new Schema(
   {
     userName: {
@@ -43,7 +58,8 @@ const UserModel = new Schema(
     },
     avatar: {
       type: String,
-      default: "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg",
+      default:
+        "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg",
     },
     archivedPosts: [
       {
@@ -75,10 +91,26 @@ const UserModel = new Schema(
         ref: "User",
       },
     ],
+    history:{
+      type: mongoose.Schema.ObjectId,
+      ref: "History",
+    },
     bio: {
       type: String,
       default: "",
     },
+    likedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
+    dislikedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
     bookmarks: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -111,6 +143,7 @@ const UserModel = new Schema(
       type: String,
       default: null,
     },
+
     age: {
       type: Number,
       get: function () {

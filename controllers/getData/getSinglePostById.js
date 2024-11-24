@@ -31,7 +31,9 @@ export const getPostByIdController = async (req, res) => {
       message: e.OK.message,
       success: true,
       requestedPost: post,
-      comments: allComments,
+      comments: allComments.reverse(),
+      peopleLiked:post.likes,
+      peopleDisliked:post.dislikes
     });
   } catch (error) {
     return res.status(e.INTERNAL_SERVER_ERROR.code).json({

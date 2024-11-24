@@ -13,7 +13,7 @@ export const loginController = async (req, res) => {
       }
       const user = await User.findOne({ userId });
       if (!user) {
-        console.log(res)
+        // console.log(res)
         return res.status(e.BAD_REQUEST.code).json({
           message: "No user found with this userId.",
           success: false,
@@ -37,7 +37,10 @@ export const loginController = async (req, res) => {
         success: true,
       });
     } catch (error) {
-      console.log(error);
+      return res.status(e.INTERNAL_SERVER_ERROR.code).json({
+        message: error.message ? error.message : "Unknown error occured!",
+        success: false,
+      });
     }
   };
   

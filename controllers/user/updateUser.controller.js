@@ -4,7 +4,7 @@ import mediaDB from "../../database/cloudinary.js";
 
 export const updateUserController = async (req, res) => {
   try {
-    console.log("requested");
+    // console.log("requested");
     const user = req.user;
     if (!user) {
       return res.status(e.NOT_FOUND.code).json({
@@ -22,24 +22,6 @@ export const updateUserController = async (req, res) => {
       dateOfBirth,
       bio,
     } = req.body;
-    console.log(
-      userName,
-      password,
-      isPrivate,
-      isDisabled,
-      gender,
-      dateOfBirth,
-      bio
-    );
-    console.log(
-      userName,
-      password,
-      isPrivate,
-      isDisabled,
-      gender,
-      dateOfBirth,
-      bio
-    );
     const avatar = req.file ? req.file.path : null;
     if (
       !userName &&
@@ -55,7 +37,7 @@ export const updateUserController = async (req, res) => {
         message: "No updated data provided!",
       });
     }
-    console.log(isPrivate);
+    // console.log(isPrivate);
 
     if (userName && user.userName !== userName) {
       user.userName = userName.trim();
@@ -107,7 +89,7 @@ export const updateUserController = async (req, res) => {
       dateOfBirth: user.dateOfBirth ? user.dateOfBirth : null,
       bio: user.bio ? user.bio : null,
     };
-    console.log(updatedData);
+    // console.log(updatedData);
 
     await user.save();
     return res.status(e.OK.code).json({
@@ -116,7 +98,7 @@ export const updateUserController = async (req, res) => {
       data: updatedData,
     });
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     return res.status(e.INTERNAL_SERVER_ERROR.code).json({
       message: "An error occurred while updating the profile.",
       success: false,

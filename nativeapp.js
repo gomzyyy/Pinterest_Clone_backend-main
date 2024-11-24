@@ -29,7 +29,7 @@ app.use("/api", route)
 //server
 
 app.listen(PORT, (req, res) => {
-  console.log(`http://localhost:${PORT}/`);
-  console.log('connecting to database...')
+  // console.log(`http://localhost:${PORT}/`);
+  // console.log('connecting to database...')
   connectMongoDB();
 });

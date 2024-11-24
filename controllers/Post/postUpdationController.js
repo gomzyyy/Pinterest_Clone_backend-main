@@ -9,11 +9,10 @@ export const postUpdationController = async (req, res) => {};
 
 export const postActionsController = async (req, res) => {
   try {
-    console.log("Updating");
-    const { likes, getComment, reportPost, dislikes } = req.body;
+    const { liked, getComment, reportPost, dislikes } = req.body;
     const { postId } = req.params;
     const user = req.user;
-
+    // console.log(liked);
     if (!postId) {
       return res.status(e.BAD_REQUEST.code).json({
         message: "Post ID is required",
@@ -30,7 +29,7 @@ export const postActionsController = async (req, res) => {
     }
 
     if (
-      likes === undefined &&
+      liked === undefined &&
       !getComment &&
       !reportPost &&
       dislikes === undefined
@@ -41,12 +40,21 @@ export const postActionsController = async (req, res) => {
       });
     }
 
-    if (likes !== undefined) {
-      likes ? post.likes.addToSet(user._id) : post.likes.pull(user._id);
+    if (liked !== undefined) {
+      if (liked) {
+        post.likes.addToSet(user._id);
+      } else {
+        if (!post.likes.includes(user._id)) {
+          return;
+        }
+        post.likes.pull(user._id);
+      }
     }
 
     if (dislikes !== undefined) {
-      dislikes ? post.dislikes.addToSet(user._id) : post.dislikes.pull(user._id);
+      dislikes
+        ? post.dislikes.addToSet(user._id)
+        : post.dislikes.pull(user._id);
     }
 
     if (getComment) {
@@ -86,11 +94,16 @@ export const postActionsController = async (req, res) => {
     }
 
     await post.save();
+    // console.log(post.likes);
     return res.status(e.OK.code).json({
       success: true,
       message: "Post updated!",
+      data: {
+        peopleLiked: post.likes,
+        peopleDisliked: post.dislikes,
+        comments: post.comments,
+      },
     });
-
   } catch (error) {
     return res.status(e.INTERNAL_SERVER_ERROR.code).json({
       message: "Unable to perform action.",
@@ -99,4 +112,3 @@ export const postActionsController = async (req, res) => {
     });
   }
 };
-

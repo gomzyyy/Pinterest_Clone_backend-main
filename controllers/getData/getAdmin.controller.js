@@ -3,9 +3,8 @@ import { Post } from "../../models/userModel/postModel/post.model.js";
 
 export const getAdminController = async (req, res) => {
   try {
-    console.log("Requested");
+    // console.log("Requested");
     const user = req.user;
-    // console.log(user)
     if (!user) {
       return res.status(e.UNAUTHORIZED.code).json({
         message: "User not found!",

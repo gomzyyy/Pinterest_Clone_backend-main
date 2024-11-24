@@ -2,6 +2,8 @@ import { HTTP_STATUS_CODES as e } from "../../staticData/errorMessages.js";
 import { User } from "../../models/userModel/user.model.js";
 import bcrypt from "bcryptjs";
 
+const specialCharacterPattern = /[!@#$%^&*()\-=+:;<>\.~`|?/{}\[\],]/;
+
 export const signupController = async (req, res) => {
   try {
     const { userName, userId, password, confirmPassword } = req.body;
@@ -22,31 +24,42 @@ export const signupController = async (req, res) => {
         success: false,
       });
     }
-    if(userName.length>16){
+    if (userName.length > 16) {
       return res.status(e.UNPROCESSABLE_ENTITY.code).json({
         message: "Username can't exceed 16 characters.",
         success: false,
       });
     }
-    if(userName.length<4){
+    if (userName.length < 4) {
       return res.status(e.UNPROCESSABLE_ENTITY.code).json({
         message: "Username can't be less than 4 characters.",
         success: false,
       });
     }
-    if(userId.length>16){
+    if (specialCharacterPattern.test(userName)) {
+      return res.status(e.UNPROCESSABLE_ENTITY.code).json({
+        message: "Username can't contain special characters i.e:@,$,#...",
+        success: false,
+      });
+    }
+    if (userId.length > 16) {
       return res.status(e.UNPROCESSABLE_ENTITY.code).json({
         message: "userId can't exceed 16 characters.",
         success: false,
       });
     }
-    if(userId.length<4){
+    if (userId.length < 4) {
       return res.status(e.UNPROCESSABLE_ENTITY.code).json({
         message: "userId can't be less than 4 characters.",
         success: false,
       });
     }
-
+    if (specialCharacterPattern.test(userId)) {
+      return res.status(e.UNPROCESSABLE_ENTITY.code).json({
+        message: "userId can't contain special characters i.e:@,$,#...",
+        success: false,
+      });
+    }
     const encryptedPassword = await bcrypt.hash(password, 10);
     await User.create({
       userName,
@@ -58,6 +71,9 @@ export const signupController = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.log(error);
+    return res.status(e.INTERNAL_SERVER_ERROR.code).json({
+      message: error.message ? error.message : "Unknown error occured!",
+      success: false,
+    });
   }
 };
