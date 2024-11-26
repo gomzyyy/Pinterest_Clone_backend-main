@@ -192,7 +192,7 @@ export const serveSuggestedUsers = async (req, res) => {
           message: e.OK.message,
           success: true,
           data: {
-            suggestedUsers: [],
+            suggestedUsers: allUsersExcludingMe,
           },
         });
       }
@@ -220,7 +220,7 @@ export const serveSuggestedUsers = async (req, res) => {
 export const serveSearchSuggestions = async (req, res) => {
   try {
     const admin = req.user;
-    const { query } = req.params;
+    const { query,tag } = req.params;
     if (!admin) {
       return res.status(e.UNAUTHORIZED.code).json({
         message: e.UNAUTHORIZED.message,
@@ -233,29 +233,43 @@ export const serveSearchSuggestions = async (req, res) => {
         success: false,
       });
     }
-    if (query[0] === "#") {
-      const allPosts = await Post.find({ tags: query });
-      if (!allPosts) {
-        return res.status(e.NOT_FOUND.code).json({
-          message: "Can't find the posts from the database.",
-          success: false,
+    console.log(query)
+    if (query.trim()[0] === "@") {
+      if(query.slice(1).trim().length!==0) {
+        // console.log("Searching by Username");
+        // console.log(query.slice(1).trim())
+        const allUsers = await User.find({
+          userName: {
+            $regex: `^${query.slice(1)}`,
+            $options: "i",
+          },
+        }).limit(30);
+      
+        if (allUsers.length === 0) {
+          return res.status(e.NOT_FOUND.code).json({
+            message: "No users found in the database.",
+            success: false,
+          });
+        }
+      
+        const allUsersExcludingAdmin = allUsers.filter(
+          (a) => a._id.toString() !== admin._id.toString()
+        );
+      
+        return res.status(e.OK.code).json({
+          message: "Request accepted.",
+          success: true,
+          data: {
+            result: allUsersExcludingAdmin,
+            type: "User",
+          },
         });
       }
-      const adminPostIds = admin.posts.map((m) => m._id.toString());
-      const allPostsExcludingAdminPosts = allPosts.filter(
-        (p) => !adminPostIds.includes(p._id.toString())
-      );
-      return res.status(e.OK.code).json({
-        message: "Request accepted.",
-        success: true,
-        data: {
-          result: allPostsExcludingAdminPosts,
-          type: "Post",
-        },
-      });
     }
-    if (query[0] === "@") {
-      const allUsers = await User.find({ userId: query }).limit(30);
+     else if (!specialCharacterPattern.test(query)) {
+      const allUsers = await User.find({
+        userName: { $regex: `^${query.trim()}`, $options: "i" },
+      }).limit(30);
       if (!allUsers) {
         return res.status(e.NOT_FOUND.code).json({
           message: "Can't find the posts from the database.",
@@ -265,35 +279,93 @@ export const serveSearchSuggestions = async (req, res) => {
       const allUsersExcludingAdmin = allUsers.filter(
         (a) => a._id.toString() !== admin._id.toString()
       );
-      return res.status(e.OK.code).json({
-        message: "Request accepted.",
-        success: true,
-        data: {
-          result: allUsersExcludingAdmin,
-          type: "User",
-        },
-      });
-    }
-    if (!specialCharacterPattern.test(query)) {
-      const allUsers = await User.find({ userName: query }).limit(30);
-      if (!allUsers) {
-        return res.status(e.NOT_FOUND.code).json({
-          message: "Can't find the posts from the database.",
-          success: false,
+      if (allUsersExcludingAdmin.length !== 0) {
+        return res.status(e.OK.code).json({
+          message: "Request accepted.",
+          success: true,
+          data: {
+            result: allUsersExcludingAdmin,
+            type: "User",
+          },
         });
       }
-      const allUsersExcludingAdmin = allUsers.filter(
-        (a) => a._id.toString() !== admin._id.toString()
-      );
       return res.status(e.OK.code).json({
         message: "Request accepted.",
         success: true,
         data: {
-          result: allUsersExcludingAdmin,
+          result: [],
           type: "User",
         },
       });
     }
+    return res.status(e.NO_CONTENT.code).json({
+      message: "No results.",
+      success: false,
+      data: {
+        result: [],
+      },
+    });
+  } catch (error) {
+    return res.status(e.INTERNAL_SERVER_ERROR.code).json({
+      message: e.INTERNAL_SERVER_ERROR.message,
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "An unknown server error occurred",
+    });
+  }
+};
+
+export const serveSearchedPostsByTags = async (req, res) => {
+  try {
+    const admin = req.user;
+    const { tag } = req.params;
+    if (!admin) {
+      return res.status(e.UNAUTHORIZED.code).json({
+        message: e.UNAUTHORIZED.message,
+        success: false,
+      });
+    }
+    if (!tag) {
+      return res.status(e.BAD_REQUEST.code).json({
+        message: "Not enough data provided to perform the action.",
+        success: false,
+      });
+    }
+    console.log(tag)
+   
+    if (tag.trim()[0] === "#") {
+      if(tag.slice(1).trim().length!==0){
+       console.log("Searching posts by tags");
+       console.log(tag.slice(1))
+       const allPosts = await Post.find({
+         tags: {
+           $regex:`^${query.slice(1)}`,
+           $options:'i'
+         },
+       });
+       if (!allPosts) {
+         return res.status(e.NOT_FOUND.code).json({
+           message: "Can't find the posts from the database.",
+           success: false,
+         });
+       }
+       const adminPostIds = admin.posts.map((m) => m._id.toString());
+       const allPostsExcludingAdminPosts = allPosts.filter(
+         (p) => !adminPostIds.includes(p._id.toString())
+       );
+       return res.status(e.OK.code).json({
+         message: "Request accepted.",
+         success: true,
+         data: {
+           result: allPostsExcludingAdminPosts,
+           type: "Post",
+         },
+       });
+      }
+     }
+
     return res.status(e.NO_CONTENT.code).json({
       message: "No results.",
       success: false,

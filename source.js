@@ -20,7 +20,8 @@ import {
   serveAllUsers,
   servePremiumUsers,
   serveSuggestedUsers,
-  serveSearchSuggestions
+  serveSearchSuggestions,
+  serveSearchedPostsByTags
 } from "./controllers/getData/serveUsers.controller.js";
 export {
   getUserController,
@@ -42,6 +43,7 @@ export {
   servePremiumUsers,
   serveSuggestedUsers,
   serveSearchSuggestions,
+  serveSearchedPostsByTags,
   servePosts,
   authorise,
 };

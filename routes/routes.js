@@ -19,6 +19,7 @@ import {
   servePremiumUsers,
   serveSearchSuggestions,
   serveSuggestedUsers,
+  serveSearchedPostsByTags,
   authorise,
   autoLoginController,
 } from "../source.js";
@@ -69,5 +70,7 @@ route.get("/user/profile/get-user", authorise, getAdminController);
 route.get("/check-user", authorise, autoLoginController);
 route.get("/user/get/:userId", authorise, getUserController);
 route.get("/user/get/:dataType", authorise, serveStaticData);
+route.get("/user/get-posts/tag/:tag", authorise, serveSearchedPostsByTags);
+
 
 export default route;

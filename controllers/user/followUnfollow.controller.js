@@ -12,6 +12,7 @@ export const followUnfollowController = async (req, res) => {
         success: false,
       });
     }
+    // console.log(isFollowedId,isUnfollowedId)
 
     if (isFollowedId) {
       const userFollowed = await User.findById(isFollowedId)
@@ -31,11 +32,22 @@ export const followUnfollowController = async (req, res) => {
           (f) => f._id.toString() === user._id.toString()
         )
       ) {
+        if (String(isFollowedId) !== user._id.toString()) {
+          user.following.push({ _id: isFollowedId });
+          userFollowed.followers.push({ _id: user._id });
+        } else {
+          console.log("Can't follow yourself.")
+          return res.status(e.BAD_REQUEST.code).json({
+            message: "Can't follow yourself.",
+            success: false,
+          });
+        }
         // console.log("Adding follow relationship...");
-        user.following.push({ _id: isFollowedId });
-        userFollowed.followers.push({ _id: user._id });
       } else {
-        // console.log("User is already being followed.");
+        return res.status(e.BAD_REQUEST.code).json({
+          message: "Already followed this account.",
+          success: false,
+        });
       }
 
       await Promise.all([user.save(), userFollowed.save()]);
