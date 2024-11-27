@@ -3,7 +3,7 @@ import { User } from "../../models/userModel/user.model.js";
 
 export const followUnfollowController = async (req, res) => {
   try {
-    const user = req.user;
+    const admin = req.user;
     const { isFollowedId, isUnfollowedId } = req.body;
 
     if (!isFollowedId && !isUnfollowedId) {
@@ -12,7 +12,7 @@ export const followUnfollowController = async (req, res) => {
         success: false,
       });
     }
-    // console.log(isFollowedId,isUnfollowedId)
+    console.log(isFollowedId,isUnfollowedId)
 
     if (isFollowedId) {
       const userFollowed = await User.findById(isFollowedId)
@@ -27,14 +27,15 @@ export const followUnfollowController = async (req, res) => {
       }
 
       if (
-        !user.following.some((f) => f._id.toString() === isFollowedId) &&
+        !admin.following.some((f) => f._id.toString() === isFollowedId) &&
         !userFollowed.followers.some(
-          (f) => f._id.toString() === user._id.toString()
+          (f) => f._id.toString() === admin._id.toString()
         )
       ) {
-        if (String(isFollowedId) !== user._id.toString()) {
-          user.following.push({ _id: isFollowedId });
-          userFollowed.followers.push({ _id: user._id });
+        if (String(isFollowedId) !== admin._id.toString()) {
+          admin.following.push({ _id: isFollowedId });
+          userFollowed.followers.push({ _id: admin._id });
+          console.log("Followed")
         } else {
           console.log("Can't follow yourself.")
           return res.status(e.BAD_REQUEST.code).json({
@@ -44,17 +45,18 @@ export const followUnfollowController = async (req, res) => {
         }
         // console.log("Adding follow relationship...");
       } else {
+        console.log("Cant follow")
         return res.status(e.BAD_REQUEST.code).json({
           message: "Already followed this account.",
           success: false,
         });
       }
 
-      await Promise.all([user.save(), userFollowed.save()]);
+      await Promise.all([admin.save(), userFollowed.save()]);
 
       return res.status(e.OK.code).json({
         message: "Successfully followed user.",
-        success: true,
+        success: true
       });
     }
 
@@ -71,16 +73,16 @@ export const followUnfollowController = async (req, res) => {
       }
 
       if (
-        user.following.some((f) => f._id.toString() === isUnfollowedId) &&
+        admin.following.some((f) => f._id.toString() === isUnfollowedId) &&
         userUnfollowed.followers.some(
-          (f) => f._id.toString() === user._id.toString()
+          (f) => f._id.toString() === admin._id.toString()
         )
       ) {
-        user.following = user.following.filter(
+        admin.following = admin.following.filter(
           (f) => f._id.toString() !== isUnfollowedId
         );
         userUnfollowed.followers = userUnfollowed.followers.filter(
-          (f) => f._id.toString() !== user._id.toString()
+          (f) => f._id.toString() !== admin._id.toString()
         );
       } else {
         return res.status(e.NOT_MODIFIED.code).json({
@@ -89,7 +91,7 @@ export const followUnfollowController = async (req, res) => {
         });
       }
 
-      await Promise.all([user.save(), userUnfollowed.save()]);
+      await Promise.all([admin.save(), userUnfollowed.save()]);
 
       return res.status(e.OK.code).json({
         message: "Successfully unfollowed user.",

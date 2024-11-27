@@ -126,6 +126,13 @@ export const serveSuggestedUsers = async (req, res) => {
       // console.log("12344");
       const adminFollowingIds = admin.following.map((m) => m._id.toString());
       const adminFollowerIds = admin.followers.map((m) => m._id.toString());
+
+      const allUsersExcludingMeAndMyRelations = allUsersExcludingMe.filter(
+        (a) =>
+          !adminFollowingIds.includes(a._id.toString()) &&
+          !adminFollowerIds.includes(a._id.toString())
+      );
+
       if (admin.following.length > 0) {
         admin.following.forEach((u) => {
           u.following.forEach((i) => {
@@ -176,15 +183,21 @@ export const serveSuggestedUsers = async (req, res) => {
           !adminFollowerIds.includes(u._id.toString()) &&
           !adminFollowingIds.includes(u._id.toString())
       );
+      const ValidPopulatedUsersExcludingAdminAndItsRelations =
+        ValidPopulatedUsersExcludingAdmin.filter(
+          (a) =>
+            !adminFollowingIds.includes(a._id.toString()) &&
+            !adminFollowerIds.includes(a._id.toString())
+        );
       if (
-        ValidPopulatedUsersExcludingAdmin !== null &&
-        ValidPopulatedUsersExcludingAdmin.length > 0
+        ValidPopulatedUsersExcludingAdminAndItsRelations !== null &&
+        ValidPopulatedUsersExcludingAdminAndItsRelations.length > 0
       ) {
         return res.status(e.OK.code).json({
           message: e.OK.message,
           success: true,
           data: {
-            suggestedUsers: ValidPopulatedUsersExcludingAdmin,
+            suggestedUsers: ValidPopulatedUsersExcludingAdminAndItsRelations,
           },
         });
       } else {
@@ -192,7 +205,7 @@ export const serveSuggestedUsers = async (req, res) => {
           message: e.OK.message,
           success: true,
           data: {
-            suggestedUsers: allUsersExcludingMe,
+            suggestedUsers: allUsersExcludingMeAndMyRelations,
           },
         });
       }
@@ -220,7 +233,7 @@ export const serveSuggestedUsers = async (req, res) => {
 export const serveSearchSuggestions = async (req, res) => {
   try {
     const admin = req.user;
-    const { query,tag } = req.params;
+    const { query, tag } = req.params;
     if (!admin) {
       return res.status(e.UNAUTHORIZED.code).json({
         message: e.UNAUTHORIZED.message,
@@ -233,9 +246,9 @@ export const serveSearchSuggestions = async (req, res) => {
         success: false,
       });
     }
-    console.log(query)
+    console.log(query);
     if (query.trim()[0] === "@") {
-      if(query.slice(1).trim().length!==0) {
+      if (query.slice(1).trim().length !== 0) {
         // console.log("Searching by Username");
         // console.log(query.slice(1).trim())
         const allUsers = await User.find({
@@ -244,18 +257,18 @@ export const serveSearchSuggestions = async (req, res) => {
             $options: "i",
           },
         }).limit(30);
-      
+
         if (allUsers.length === 0) {
           return res.status(e.NOT_FOUND.code).json({
             message: "No users found in the database.",
             success: false,
           });
         }
-      
+
         const allUsersExcludingAdmin = allUsers.filter(
           (a) => a._id.toString() !== admin._id.toString()
         );
-      
+
         return res.status(e.OK.code).json({
           message: "Request accepted.",
           success: true,
@@ -265,8 +278,7 @@ export const serveSearchSuggestions = async (req, res) => {
           },
         });
       }
-    }
-     else if (!specialCharacterPattern.test(query)) {
+    } else if (!specialCharacterPattern.test(query)) {
       const allUsers = await User.find({
         userName: { $regex: `^${query.trim()}`, $options: "i" },
       }).limit(30);
@@ -333,38 +345,38 @@ export const serveSearchedPostsByTags = async (req, res) => {
         success: false,
       });
     }
-    console.log(tag)
-   
+    console.log(tag);
+
     if (tag.trim()[0] === "#") {
-      if(tag.slice(1).trim().length!==0){
-       console.log("Searching posts by tags");
-       console.log(tag.slice(1))
-       const allPosts = await Post.find({
-         tags: {
-           $regex:`^${query.slice(1)}`,
-           $options:'i'
-         },
-       });
-       if (!allPosts) {
-         return res.status(e.NOT_FOUND.code).json({
-           message: "Can't find the posts from the database.",
-           success: false,
-         });
-       }
-       const adminPostIds = admin.posts.map((m) => m._id.toString());
-       const allPostsExcludingAdminPosts = allPosts.filter(
-         (p) => !adminPostIds.includes(p._id.toString())
-       );
-       return res.status(e.OK.code).json({
-         message: "Request accepted.",
-         success: true,
-         data: {
-           result: allPostsExcludingAdminPosts,
-           type: "Post",
-         },
-       });
+      if (tag.slice(1).trim().length !== 0) {
+        console.log("Searching posts by tags");
+        console.log(tag.slice(1));
+        const allPosts = await Post.find({
+          tags: {
+            $regex: `^${query.slice(1)}`,
+            $options: "i",
+          },
+        });
+        if (!allPosts) {
+          return res.status(e.NOT_FOUND.code).json({
+            message: "Can't find the posts from the database.",
+            success: false,
+          });
+        }
+        const adminPostIds = admin.posts.map((m) => m._id.toString());
+        const allPostsExcludingAdminPosts = allPosts.filter(
+          (p) => !adminPostIds.includes(p._id.toString())
+        );
+        return res.status(e.OK.code).json({
+          message: "Request accepted.",
+          success: true,
+          data: {
+            result: allPostsExcludingAdminPosts,
+            type: "Post",
+          },
+        });
       }
-     }
+    }
 
     return res.status(e.NO_CONTENT.code).json({
       message: "No results.",
