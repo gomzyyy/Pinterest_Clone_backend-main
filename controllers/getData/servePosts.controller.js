@@ -3,40 +3,70 @@ import { HTTP_STATUS_CODES as e } from "../../staticData/errorMessages.js";
 
 export const servePosts = async (req, res) => {
   try {
+    console.log("Serving posts...");
     const admin = req.user;
+
+    if (!admin || !Array.isArray(admin.following)) {
+      return res.status(400).json({
+        message: "Admin data is invalid or missing.",
+        success: false,
+        posts: []
+      });
+    }
+
     const peopleFollowedByAdmin = admin.following;
-    const postIdsByAdminFollowing = peopleFollowedByAdmin.map((p) => p.posts.map((m)=>m.toString()));
+
+    if (peopleFollowedByAdmin.length === 0) {
+      return res.status(404).json({
+        message: "Admin didn't follow anyone.",
+        success: false,
+        posts: []
+      });
+    }
+
+    const postIdsByAdminFollowing = peopleFollowedByAdmin.map((p) =>
+      p.posts?.map((m) => m.toString()) || []
+    ).flat();  // Flatten the array of arrays
+
+    if (postIdsByAdminFollowing.length === 0) {
+      return res.status(404).json({
+        message: "No posts found from followed users.",
+        success: false,
+        posts: []
+      });
+    }
+
     const postsByAdminFollowing = await Promise.all(
-      postIdsByAdminFollowing[0].map((p) =>{
-       return Post.findById(p).populate("admin")})
+      postIdsByAdminFollowing.map((p) => Post.findById(p).populate(["admin","likes","dislikes",{path:"comments",populate:{path:"admin"}}]))
     );
 
     const allPosts = await Post.find().populate("admin");
-    if (!allPosts) {
-      return res.status(e.NOT_FOUND.code).json({
+    if (!allPosts || allPosts.length === 0) {
+      return res.status(404).json({
         message: "No posts available.",
         success: false,
+        posts: []
       });
     }
-    const filteredPosts = allPosts.filter((p) => {
-      return p.visible && p.reportStatus < 10;
-    });
-    res.status(e.OK.code).json({
-      message: "Posts served success!",
+
+    const filteredPosts = allPosts.filter((p) => p.visible && p.reportStatus < 10);
+// console.log(postsByAdminFollowing)
+    res.status(200).json({
+      message: "Posts served successfully!",
       posts: postsByAdminFollowing,
       success: true,
     });
   } catch (error) {
-    return res.status(e.INTERNAL_SERVER_ERROR.code).json({
-      message: "Can't react the server.",
+    console.error(error);
+    return res.status(500).json({
+      message: "Can't reach the server.",
       success: false,
-      error:
-        error instanceof Error
-          ? error.message
-          : e.INTERNAL_SERVER_ERROR.message,
+      posts: [],
+      error: error.message || "Internal Server Error",
     });
   }
 };
+
 
 export const serveTrendingPosts = async (req, res) => {
   try {

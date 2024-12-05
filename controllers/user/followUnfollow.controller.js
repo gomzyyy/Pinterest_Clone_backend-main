@@ -12,8 +12,7 @@ export const followUnfollowController = async (req, res) => {
         success: false,
       });
     }
-    console.log(isFollowedId,isUnfollowedId)
-
+    // console.log(isFollowedId,isUnfollowedId)
     if (isFollowedId) {
       const userFollowed = await User.findById(isFollowedId)
         .select("-otp")

@@ -5,6 +5,7 @@ import { promisify } from "util";
 
 export const authorise = async (req, res, next) => {
   try {
+    // console.log("req")
     const authHeader = req.headers.authorization;
     if (!authHeader || !authHeader.startsWith("Bearer ")) {
       return res.status(e.UNAUTHORIZED.code).json({

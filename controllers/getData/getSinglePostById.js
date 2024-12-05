@@ -9,10 +9,23 @@ export const getPostByIdController = async (req, res) => {
       return res.status(e.UNAUTHORIZED.code).json({
         message: e.UNAUTHORIZED.message,
         success: false,
+        post: [],
       });
     }
     const { postId } = req.params;
-    const post = await Post.findById(postId);
+    if (!postId)
+      return res.status(e.BAD_REQUEST.code).json({
+        message: "Post ID not provided.",
+        sucess: false,
+        data: {
+          post: [],
+        },
+      });
+    const post = await Post.findById(postId).populate([
+      "admin",
+      { path: "comments", populate: { path: "admin" } },
+      "likes",
+    ]);
     const allComments = await Promise.all(
       post.comments.map(async (c) => {
         const populatedComment = Comment.findById(c._id).populate("admin");
@@ -23,6 +36,9 @@ export const getPostByIdController = async (req, res) => {
       return res.status(e.NOT_FOUND.code).json({
         message: e.NOT_FOUND.message,
         success: false,
+        data: {
+          post: [],
+        },
       });
     }
     if (!post.visits.includes(user._id)) post.visits.push(user._id);
@@ -30,10 +46,9 @@ export const getPostByIdController = async (req, res) => {
     return res.status(e.OK.code).json({
       message: e.OK.message,
       success: true,
-      requestedPost: post,
-      comments: allComments.reverse(),
-      peopleLiked:post.likes,
-      peopleDisliked:post.dislikes
+      data: {
+        post,
+      },
     });
   } catch (error) {
     return res.status(e.INTERNAL_SERVER_ERROR.code).json({

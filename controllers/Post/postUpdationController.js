@@ -9,10 +9,11 @@ export const postUpdationController = async (req, res) => {};
 
 export const postActionsController = async (req, res) => {
   try {
-    const { liked, getComment, reportPost, dislikes } = req.body;
+    const { postLiked, postUnLiked, getComment, reportPost, dislikes } =
+      req.body;
     const { postId } = req.params;
-    const user = req.user;
-    // console.log(liked);
+    const admin = req.user;
+    console.log("postLiked: ", postLiked, "postUnLiked: ", postUnLiked);
     if (!postId) {
       return res.status(e.BAD_REQUEST.code).json({
         message: "Post ID is required",
@@ -20,16 +21,21 @@ export const postActionsController = async (req, res) => {
       });
     }
 
-    const post = await Post.findById(postId);
+    const post = await Post.findById(postId); // yaha pe ayi
+
     if (!post) {
       return res.status(e.NOT_FOUND.code).json({
         message: "Post not found",
         success: false,
       });
     }
+    // console.log(postLiked, postUnLiked);
+    // console.log(post);
+    // console.log(allLikes);
 
     if (
-      liked === undefined &&
+      !postLiked &&
+      !postUnLiked &&
       !getComment &&
       !reportPost &&
       dislikes === undefined
@@ -40,21 +46,28 @@ export const postActionsController = async (req, res) => {
       });
     }
 
-    if (liked !== undefined) {
-      if (liked) {
-        post.likes.addToSet(user._id);
-      } else {
-        if (!post.likes.includes(user._id)) {
-          return;
-        }
-        post.likes.pull(user._id);
-      }
+    if (postLiked && postUnLiked) {
+      return res.status(e.CONFLICT.code).json({
+        message: "Can't perform alternate actions simultaneously",
+        success: false,
+      });
     }
+    if (postLiked || postUnLiked) {
+      const allLikes = post.likes.map((m) => m.toString());
 
-    if (dislikes !== undefined) {
-      dislikes
-        ? post.dislikes.addToSet(user._id)
-        : post.dislikes.pull(user._id);
+      if (postLiked) {
+        console.log("lrnvjrvi");
+        if (!allLikes.includes(admin._id.toString())) {
+          post.likes.addToSet(admin._id);
+          admin.likedPosts.addToSet(postId);
+        }
+      } else if (postUnLiked) {
+        console.log("cjrehi");
+        if (allLikes.includes(admin._id.toString())) {
+          post.likes.pull(admin._id);
+          admin.likedPosts.pull(postId);
+        }
+      }
     }
 
     if (getComment) {
@@ -74,7 +87,7 @@ export const postActionsController = async (req, res) => {
 
       const newComment = new Comment({
         text: trimmedComment,
-        admin: user._id,
+        admin: admin._id,
       });
       await newComment.save();
       post.comments.push(newComment._id);
@@ -92,12 +105,25 @@ export const postActionsController = async (req, res) => {
         success: true,
       });
     }
+    await Promise.all([admin.save(), post.save()]); // yaha pe save hori hai
 
-    await post.save();
-    // console.log(post.likes);
+    const updatedPost = await Post.findById(postId)
+      .populate([
+        { path: "admin" },
+        {
+          path: "comments",
+          populate: { path: "admin" },
+        },
+        { path: "likes" },
+        { path: "dislikes" },
+      ])
+      .exec();
+
+    console.log(updatedPost);
     return res.status(e.OK.code).json({
       success: true,
       message: "Post updated!",
+      post: updatedPost,
       data: {
         peopleLiked: post.likes,
         peopleDisliked: post.dislikes,
