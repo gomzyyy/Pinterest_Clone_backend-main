@@ -56,6 +56,12 @@ const PostModel = new Schema(
         ref: "User",
       },
     ],
+    servedTo: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     comments: [
       {
         type: mongoose.Schema.Types.ObjectId,

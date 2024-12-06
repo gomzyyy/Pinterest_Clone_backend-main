@@ -10,7 +10,7 @@ export const servePosts = async (req, res) => {
       return res.status(400).json({
         message: "Admin data is invalid or missing.",
         success: false,
-        posts: []
+        posts: [],
       });
     }
 
@@ -20,40 +20,60 @@ export const servePosts = async (req, res) => {
       return res.status(404).json({
         message: "Admin didn't follow anyone.",
         success: false,
-        posts: []
+        posts: [],
       });
     }
 
-    const postIdsByAdminFollowing = peopleFollowedByAdmin.map((p) =>
-      p.posts?.map((m) => m.toString()) || []
-    ).flat();  // Flatten the array of arrays
+    const postIdsByAdminFollowing = peopleFollowedByAdmin
+      .map((p) => p.posts?.map((m) => m.toString()) || [])
+      .flat(); // Flatten the array of arrays
 
     if (postIdsByAdminFollowing.length === 0) {
       return res.status(404).json({
         message: "No posts found from followed users.",
         success: false,
-        posts: []
+        posts: [],
       });
     }
 
     const postsByAdminFollowing = await Promise.all(
-      postIdsByAdminFollowing.map((p) => Post.findById(p).populate(["admin","likes","dislikes",{path:"comments",populate:{path:"admin"}}]))
+      postIdsByAdminFollowing.map((p) =>
+        Post.findById(p).populate([
+          "admin",
+          "likes",
+          "dislikes",
+          { path: "comments", populate: { path: "admin" } },
+        ])
+      )
     );
+
+    const newPosts = postsByAdminFollowing.filter(
+      (f) => !f.servedTo.includes(admin._id)
+    );
+    // console.log("New POSTS: ", newPosts[0]);
+    await Promise.all([
+      newPosts.forEach((n) => {
+        n.servedTo.push(admin._id);
+        n.save();
+      }),
+    ]);
 
     const allPosts = await Post.find().populate("admin");
     if (!allPosts || allPosts.length === 0) {
       return res.status(404).json({
         message: "No posts available.",
         success: false,
-        posts: []
+        posts: [],
       });
     }
 
-    const filteredPosts = allPosts.filter((p) => p.visible && p.reportStatus < 10);
-// console.log(postsByAdminFollowing)
+    const filteredPosts = allPosts.filter(
+      (p) => p.visible && p.reportStatus < 10
+    );
+    // if(allPosts)
     res.status(200).json({
       message: "Posts served successfully!",
-      posts: postsByAdminFollowing,
+      posts: newPosts,
       success: true,
     });
   } catch (error) {
@@ -66,7 +86,6 @@ export const servePosts = async (req, res) => {
     });
   }
 };
-
 
 export const serveTrendingPosts = async (req, res) => {
   try {

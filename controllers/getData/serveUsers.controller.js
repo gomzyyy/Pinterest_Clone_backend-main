@@ -246,7 +246,6 @@ export const serveSearchSuggestions = async (req, res) => {
         success: false,
       });
     }
-    console.log(query);
     if (query.trim()[0] === "@") {
       if (query.slice(1).trim().length !== 0) {
         // console.log("Searching by Username");
