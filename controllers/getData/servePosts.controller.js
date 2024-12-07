@@ -77,7 +77,7 @@ export const servePosts = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    console.error(error);
+    // console.error(error);
     return res.status(500).json({
       message: "Can't reach the server.",
       success: false,

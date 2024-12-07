@@ -20,7 +20,6 @@ export const postActionsController = async (req, res) => {
         success: false,
       });
     }
-
     const post = await Post.findById(postId); // yaha pe ayi
 
     if (!post) {
@@ -29,10 +28,6 @@ export const postActionsController = async (req, res) => {
         success: false,
       });
     }
-    // console.log(postLiked, postUnLiked);
-    // console.log(post);
-    // console.log(allLikes);
-
     if (
       !postLiked &&
       !postUnLiked &&
@@ -56,13 +51,11 @@ export const postActionsController = async (req, res) => {
       const allLikes = post.likes.map((m) => m.toString());
 
       if (postLiked) {
-        console.log("lrnvjrvi");
         if (!allLikes.includes(admin._id.toString())) {
           post.likes.addToSet(admin._id);
           admin.likedPosts.addToSet(postId);
         }
       } else if (postUnLiked) {
-        console.log("cjrehi");
         if (allLikes.includes(admin._id.toString())) {
           post.likes.pull(admin._id);
           admin.likedPosts.pull(postId);
@@ -119,7 +112,6 @@ export const postActionsController = async (req, res) => {
       ])
       .exec();
 
-    console.log(updatedPost);
     return res.status(e.OK.code).json({
       success: true,
       message: "Post updated!",
