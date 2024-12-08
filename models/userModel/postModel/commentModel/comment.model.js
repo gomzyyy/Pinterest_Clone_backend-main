@@ -27,14 +27,14 @@ const ReplyModel = new Schema({
     ref: "User",
     required: true,
   },
-  likes: {
+  likes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-  },
-  dislikes: {
+  }],
+  dislikes: [{
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
-  },
+  }],
   replies: [
     {
       type: mongoose.Schema.Types.ObjectId,
