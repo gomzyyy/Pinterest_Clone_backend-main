@@ -15,19 +15,42 @@ const ReportUserModel = new Schema({
 export const ReportUser = mongoose.model("ReportUser", ReportUserModel);
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
-const historyModel = new Schema({
-  userIds:[{
-    type:String
-  }],
-  userNames:[{
-    type:String
-  }],
-  tags:[{
- type:String
-  }]
-})
 
-export const History = mongoose.model("History", historyModel)
+
+const userHistoryModel = new Schema({
+  user:{
+   type:mongoose.Schema.Types.ObjectId,
+   ref:"User"
+  }
+},{timestamps:true})
+export const UserHistory = mongoose.model("UserHistory",userHistoryModel)
+
+
+const tagHistoryModel = new Schema({
+  tag:{
+   type:String
+  }
+},{timestamps:true})
+export const TagHistory = mongoose.model("TagHistory",tagHistoryModel)
+
+
+
+const historyModel = new Schema({
+  users: [
+    {
+     type:mongoose.Schema.Types.ObjectId,
+     ref:"UserHistory"
+    }
+  ],
+  tags: [
+    {
+     type:mongoose.Schema.Types.ObjectId,
+     ref:"TagHistory"
+    },
+  ],
+});
+
+export const History = mongoose.model("History", historyModel);
 
 const UserModel = new Schema(
   {
@@ -61,6 +84,18 @@ const UserModel = new Schema(
       default:
         "https://www.hrnk.org/wp-content/uploads/2024/08/Placeholder-Profile-Image.jpg",
     },
+    visitedProfiles: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+    visitedPosts: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Post",
+      },
+    ],
     archivedPosts: [
       {
         type: mongoose.Schema.Types.ObjectId,
@@ -91,7 +126,7 @@ const UserModel = new Schema(
         ref: "User",
       },
     ],
-    history:{
+    history: {
       type: mongoose.Schema.ObjectId,
       ref: "History",
     },

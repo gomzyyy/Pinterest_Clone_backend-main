@@ -9,6 +9,7 @@ import {
   postActionsController,
   getAdminController,
   getUserController,
+  getUserAndSaveInHistoryController,
   getPostByIdController,
   postUpdationController,
   followUnfollowController,
@@ -17,10 +18,14 @@ import {
   servePosts,
   serveAllUsers,
   servePremiumUsers,
+  serveTrendingPosts,
   serveSearchSuggestions,
   serveSuggestedUsers,
   serveSearchedPostsByTags,
   authorise,
+  serveHistoryController,
+  deleteSpecificHistoryController,
+  deleteAllHistoryController,
   autoLoginController,
 } from "../source.js";
 import { upload } from "../middlewares/multer.js";
@@ -58,9 +63,12 @@ route.post(
   upload.none(),
   removeFollower
 );
+route.post("/user/history/remove",authorise,deleteSpecificHistoryController)
 
 // serving data
 
+route.get("/user/history",authorise,serveHistoryController)
+route.get("/user/get/trending/posts",authorise,serveTrendingPosts)
 route.get("/user/get-posts", authorise, servePosts);
 route.get("/user/get-users/all", authorise, serveAllUsers);
 route.get("/user/get-users/suggestions", authorise,serveSuggestedUsers);
@@ -68,6 +76,7 @@ route.get("/user/search/:query", authorise,serveSearchSuggestions);
 route.get("/user/post/get-post/:postId", authorise, getPostByIdController);
 route.get("/user/profile/get-user", authorise, getAdminController);
 route.get("/check-user", authorise, autoLoginController);
+route.get("/user/get/set/:userId", authorise, getUserAndSaveInHistoryController);
 route.get("/user/get/:userId", authorise, getUserController);
 route.get("/user/get/:dataType", authorise, serveStaticData);
 route.get("/user/get-posts/tag/:tag", authorise, serveSearchedPostsByTags);

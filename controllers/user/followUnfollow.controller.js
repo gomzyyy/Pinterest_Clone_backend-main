@@ -12,7 +12,6 @@ export const followUnfollowController = async (req, res) => {
         success: false,
       });
     }
-    // console.log(isFollowedId,isUnfollowedId)
     if (isFollowedId) {
       const userFollowed = await User.findById(isFollowedId)
         .select("-otp")
@@ -34,17 +33,13 @@ export const followUnfollowController = async (req, res) => {
         if (String(isFollowedId) !== admin._id.toString()) {
           admin.following.push({ _id: isFollowedId });
           userFollowed.followers.push({ _id: admin._id });
-          console.log("Followed")
         } else {
-          console.log("Can't follow yourself.")
           return res.status(e.BAD_REQUEST.code).json({
             message: "Can't follow yourself.",
             success: false,
           });
         }
-        // console.log("Adding follow relationship...");
       } else {
-        console.log("Cant follow")
         return res.status(e.BAD_REQUEST.code).json({
           message: "Already followed this account.",
           success: false,
@@ -98,7 +93,6 @@ export const followUnfollowController = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error occurred:", error);
     return res.status(e.INTERNAL_SERVER_ERROR.code).json({
       message: error.message || "Unknown error occurred!",
       success: false,
@@ -109,9 +103,7 @@ export const followUnfollowController = async (req, res) => {
 export const removeFollower = async (req, res) => {
   try {
     const admin = req.user;
-    // console.log(admin.followers);
     const { followerId } = req.body;
-    // console.log(followerId)
     if (!followerId) {
       return res.status(e.BAD_REQUEST.code).json({
         message: "No data provided to perform any action!",
@@ -149,7 +141,6 @@ export const removeFollower = async (req, res) => {
       });
     }
   } catch (error) {
-    console.error("Error occurred:", error);
     return res.status(e.INTERNAL_SERVER_ERROR.code).json({
       message: error.message || "Unknown error occurred!",
       success: false,

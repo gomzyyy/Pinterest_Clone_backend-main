@@ -7,24 +7,25 @@ import {
   deletePostController,
 } from "./controllers/Post/post.controller.js";
 import { followUnfollowController, removeFollower } from "./controllers/user/followUnfollow.controller.js";
-import { getUserController } from "./controllers/getData/getUser.controller.js";
-import { postUpdationController } from "./controllers/Post/postUpdationController.js";
-import { postActionsController } from "./controllers/Post/postUpdationController.js";
+import { getUserController,getUserAndSaveInHistoryController } from "./controllers/getData/getUser.controller.js";
+import { postUpdationController } from "./controllers/Post/postUpdationController.controller.js";
+import { postActionsController } from "./controllers/Post/postUpdationController.controller.js";
 import { serveStaticData } from "./controllers/getData/serveStaticData.controller.js";
 import { authorise } from "./middlewares/authentication.js";
-import { servePosts } from "./controllers/getData/servePosts.controller.js";
+import { servePosts,serveTrendingPosts,serveSearchedPostsByTags } from "./controllers/getData/servePosts.controller.js";
 import { getAdminController } from "./controllers/getData/getAdmin.controller.js";
 import { autoLoginController } from "./controllers/user/autoLogin.controller.js";
-import { getPostByIdController } from "./controllers/getData/getSinglePostById.js";
+import { getPostByIdController } from "./controllers/getData/getSinglePostById.controller.js";
 import {
   serveAllUsers,
   servePremiumUsers,
   serveSuggestedUsers,
   serveSearchSuggestions,
-  serveSearchedPostsByTags
 } from "./controllers/getData/serveUsers.controller.js";
+import { serveHistoryController,deleteSpecificHistoryController,deleteAllHistoryController } from "./controllers/getData/history.controller.js";
 export {
   getUserController,
+  getUserAndSaveInHistoryController,
   signupController,
   loginController,
   logoutController,
@@ -42,8 +43,12 @@ export {
   serveAllUsers,
   servePremiumUsers,
   serveSuggestedUsers,
+  serveTrendingPosts,
   serveSearchSuggestions,
   serveSearchedPostsByTags,
   servePosts,
+  serveHistoryController,
+  deleteSpecificHistoryController,
+  deleteAllHistoryController,
   authorise,
 };

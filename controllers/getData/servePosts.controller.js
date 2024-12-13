@@ -26,7 +26,7 @@ export const servePosts = async (req, res) => {
 
     const postIdsByAdminFollowing = peopleFollowedByAdmin
       .map((p) => p.posts?.map((m) => m.toString()) || [])
-      .flat(); // Flatten the array of arrays
+      .flat();
 
     if (postIdsByAdminFollowing.length === 0) {
       return res.status(404).json({
@@ -48,9 +48,8 @@ export const servePosts = async (req, res) => {
     );
 
     const newPosts = postsByAdminFollowing.filter(
-      (f) => !f.servedTo.includes(admin._id)
+      (f) => f.servedTo.includes(admin._id)
     );
-    // console.log("New POSTS: ", newPosts[0]);
     await Promise.all([
       newPosts.forEach((n) => {
         n.servedTo.push(admin._id);
@@ -58,7 +57,7 @@ export const servePosts = async (req, res) => {
       }),
     ]);
 
-    const allPosts = await Post.find().populate("admin");
+    const allPosts = await Post.find().populate(["admin","likes","dislikes"]);
     if (!allPosts || allPosts.length === 0) {
       return res.status(404).json({
         message: "No posts available.",
@@ -73,7 +72,7 @@ export const servePosts = async (req, res) => {
     // if(allPosts)
     res.status(200).json({
       message: "Posts served successfully!",
-      posts: newPosts,
+      posts: allPosts,
       success: true,
     });
   } catch (error) {
@@ -128,7 +127,7 @@ export const serveTrendingPosts = async (req, res) => {
 
     res.status(e.OK.code).json({
       message: "Posts served success!",
-      posts: filteredPosts,
+      posts: trendingPosts,
       success: true,
     });
   } catch (error) {
@@ -142,3 +141,70 @@ export const serveTrendingPosts = async (req, res) => {
     });
   }
 };
+
+export const serveSearchedPostsByTags = async (req, res) => {
+  try {
+    const admin = req.user;
+    const { tag } = req.params;
+    if (!admin) {
+      return res.status(e.UNAUTHORIZED.code).json({
+        message: e.UNAUTHORIZED.message,
+        success: false,
+      });
+    }
+    if (!tag) {
+      return res.status(e.BAD_REQUEST.code).json({
+        message: "Not enough data provided to perform the action.",
+        success: false,
+      });
+    }
+    if (tag.trim()[0] === "#") {
+      if (tag.slice(1).trim().length !== 0) {
+        console.log("Searching posts by tags");
+        console.log(tag.slice(1));
+        const allPosts = await Post.find({
+          tags: {
+            $regex: `^${query.slice(1)}`,
+            $options: "i",
+          },
+        });
+        if (!allPosts) {
+          return res.status(e.NOT_FOUND.code).json({
+            message: "Can't find the posts from the database.",
+            success: false,
+          });
+        }
+        const adminPostIds = admin.posts.map((m) => m._id.toString());
+        const allPostsExcludingAdminPosts = allPosts.filter(
+          (p) => !adminPostIds.includes(p._id.toString())
+        );
+        return res.status(e.OK.code).json({
+          message: "Request accepted.",
+          success: true,
+          data: {
+            result: allPostsExcludingAdminPosts,
+            type: "Post",
+          },
+        });
+      }
+    }
+
+    return res.status(e.NO_CONTENT.code).json({
+      message: "No results.",
+      success: false,
+      data: {
+        result: [],
+      },
+    });
+  } catch (error) {
+    return res.status(e.INTERNAL_SERVER_ERROR.code).json({
+      message: e.INTERNAL_SERVER_ERROR.message,
+      success: false,
+      error:
+        error instanceof Error
+          ? error.message
+          : "An unknown server error occurred",
+    });
+  }
+};
+

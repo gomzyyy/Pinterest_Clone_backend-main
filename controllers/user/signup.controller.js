@@ -63,7 +63,7 @@ export const signupController = async (req, res) => {
     const encryptedPassword = await bcrypt.hash(password, 10);
     await User.create({
       userName,
-      userId,
+      userId:`@${userId}`,
       password: encryptedPassword,
     });
     return res.status(e.OK.code).json({

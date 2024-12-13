@@ -2,6 +2,7 @@ import { HTTP_STATUS_CODES as e } from "../staticData/errorMessages.js";
 import jwt from "jsonwebtoken";
 import { User } from "../models/userModel/user.model.js";
 import { promisify } from "util";
+// import { populate } from "dotenv";
 
 export const authorise = async (req, res, next) => {
   try {
@@ -37,15 +38,26 @@ export const authorise = async (req, res, next) => {
 
     const user = await User.findById(UID)
       .select("-otp")
-      .populate(["posts", "followers", "following"]);
-
+      .populate([
+        "posts",
+        "followers",
+        "following",
+        {
+          path: "history",
+          populate: [
+            { path: "users", 
+              populate: { path: "user" } },
+            { path: "tags" },
+          ],
+        },
+      ]);
     if (!user) {
       return res.status(e.NOT_FOUND.code).json({
         message: "User not found with the given token!",
         success: false,
       });
     }
-    // console.log(user);
+    // console.log(user.history);
     req.user = user;
     next();
   } catch (error) {
